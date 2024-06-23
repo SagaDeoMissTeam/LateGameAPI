@@ -1,0 +1,67 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+plugins {
+    id 'java'
+    id "com.github.johnrengelman.shadow" version "8.1.1"
+}
+
+group = 'org.example'
+version = '1.5'
+
+repositories {
+    mavenCentral()
+    maven {
+        url "https://jitpack.io"
+        content {
+            includeGroup "com.github.gitlab4j"
+        }
+    }
+}
+
+configurations {
+    shade
+    implementation.extendsFrom shade
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    shade('com.github.gitlab4j:gitlab4j-api:main-SNAPSHOT')
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'git.lategame.Main'
+        )
+    }
+}
+
+shadowJar {
+    archiveClassifier.set('all')
+    archiveClassifier = ''
+    configurations = [project.configurations.shade]
+}
+
+tasks.named('shadowJar', ShadowJar) {
+    configurations = List.of(project.configurations.shade)
+
+//    dependencies {
+//        include(dependency("com.github.gitlab4j:gitlab4j-api:main-SNAPSHOT"))
+//    }
+
+    manifest {
+        attributes(
+                'Main-Class': 'git.lategame.Main'
+        )
+    }
+}
+
+compileJava {
+    compileJava.options.encoding = 'UTF-8'
+}
